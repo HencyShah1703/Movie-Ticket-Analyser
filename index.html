@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Intel India</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; background: #f4f7f6; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .inputs { display: grid; gap: 15px; margin-bottom: 20px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        button { padding: 15px; background: #e50914; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #b20710; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
+        th { background: #f8f9fa; color: #333; }
+        #loader { display: none; text-align: center; margin: 20px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🎬 Indian Movie Finder</h1>
+        <div class="inputs">
+            <input type="text" id="movie" placeholder="Movie Name (e.g., Jawan)">
+            <input type="text" id="city" placeholder="City (e.g., Bangalore)">
+            <input type="text" id="date" placeholder="Date (e.g., 15th Oct)">
+        </div>
+        <button onclick="fetchData()">Check Showtimes</button>
+        
+        <div id="loader">Searching official sources...</div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            const movie = document.getElementById('movie').value;
+            const city = document.getElementById('city').value;
+            const date = document.getElementById('date').value;
+            const results = document.getElementById('results');
+            const loader = document.getElementById('loader');
+
+            loader.style.display = 'block';
+            results.innerHTML = '';
+
+            const response = await fetch(`/api/movies?movie=${movie}&location=${city}&date=${date}`);
+            const data = await response.json();
+            
+            loader.style.display = 'none';
+            results.innerHTML = data.html;
+        }
+    </script>
+</body>
+</html>
