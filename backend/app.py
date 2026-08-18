@@ -2,12 +2,23 @@ import json
 import os
 import re
 
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from groq import Groq
 
+load_dotenv()  # reads backend/.env when running locally; no-op on Vercel
+
 app = Flask(__name__)
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+api_key = os.environ.get("GROQ_API_KEY")
+if not api_key:
+    raise RuntimeError(
+        "GROQ_API_KEY is not set. Locally: create backend/.env with "
+        "GROQ_API_KEY=your_key. On Vercel: add it under Project Settings "
+        "-> Environment Variables, then redeploy."
+    )
+
+client = Groq(api_key=api_key)
 
 SYSTEM_PROMPT = """You are a Movie Showtime Agent for Indian cinemas.
 Given a movie name, a city, and a date, respond with ONLY a raw JSON object
@@ -57,7 +68,7 @@ def get_movie_info():
 
     try:
         completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {

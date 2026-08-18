@@ -8,10 +8,11 @@ rendered in a React UI.
 
 ```
 .
+├── api/
+│   └── index.py             # Vercel entrypoint (imports backend/app.py)
 ├── backend/
-│   ├── api/
-│   │   └── index.py        # Flask API (Groq call, JSON response)
-│   └── requirements.txt
+│   └── app.py                # Flask API (Groq call, JSON response)
+├── requirements.txt          # must stay at project root for Vercel
 ├── frontend/
 │   ├── index.html
 │   ├── package.json
@@ -37,11 +38,10 @@ rendered in a React UI.
 **1. Backend (Flask)**
 
 ```bash
-cd backend
 python -m venv venv && source venv/bin/activate   # optional but recommended
 pip install -r requirements.txt
-export GROQ_API_KEY=your_key_here                 # Windows: set GROQ_API_KEY=...
-python api/index.py
+# create backend/.env with: GROQ_API_KEY=your_key_here
+python backend/app.py
 ```
 
 The API runs at `http://127.0.0.1:5000`.
@@ -64,9 +64,13 @@ Flask server on port 5000 (see `vite.config.js`).
 1. Push this repo to GitHub.
 2. Import it in Vercel.
 3. Add an environment variable `GROQ_API_KEY` in the Vercel project settings.
-4. Vercel reads `vercel.json`, which builds `backend/api/index.py` as a
-   Python serverless function and `frontend/` as a static Vite build, then
-   routes `/api/*` to the backend and everything else to the built frontend.
+4. Vercel auto-detects `api/index.py` as a Python Serverless Function
+   (this is why it lives at the project root — Vercel requires that).
+   That file just imports the real Flask app from `backend/app.py`, so
+   the actual backend logic still stays organized in `backend/`.
+5. `vercel.json` builds the frontend via `buildCommand`/`outputDirectory`
+   and rewrites all `/api/*` requests to that one function, letting
+   Flask's internal routing (`/api/movies`, `/api/health`) handle the rest.
 
 No further configuration is needed — the build and route settings are
 already wired up in `vercel.json`.
